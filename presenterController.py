@@ -25,12 +25,25 @@ def on_message(client, userdata, message):
         keyboard.release(Key.tab)
     elif(str(message.payload.decode("utf-8")) == "enter"):
         print("enter button")
+        keyboard.release(Key.alt)
         keyboard.press(Key.enter)
         keyboard.release(Key.enter)
     elif(str(message.payload.decode("utf-8")) == "esc"):
         print("esc button")
+        keyboard.release(Key.alt)
         keyboard.press(Key.esc)
         keyboard.release(Key.esc)
+    elif(str(message.payload.decode("utf-8")) == "end"):
+        print("end button")
+        keyboard.press(Key.alt)
+        keyboard.press(Key.f4)
+        keyboard.release(Key.f4)
+        keyboard.release(Key.alt)
+    elif(str(message.payload.decode("utf-8")) == "space"):
+        print("space button")
+        keyboard.release(Key.alt)
+        keyboard.press(Key.space)
+        keyboard.release(Key.space)
         
 client= paho.Client("client-001")
 client.on_message=on_message
@@ -41,5 +54,6 @@ client.connect(broker)#connect
 client.loop_start() #start loop to process received messages
 print("subscribing ")
 client.subscribe("presenter/action")#subscribe
-time.sleep(1)
+while 1:
+    time.sleep(1)
 

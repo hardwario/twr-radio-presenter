@@ -10,9 +10,6 @@
 #define ACCELEROMETER_UPDATE_SERVICE_INTERVAL (1 * 1000)
 #define ACCELEROMETER_UPDATE_NORMAL_INTERVAL (10 * 1000)
 
-// LED instance
-bc_led_t led;
-
 // Button instance
 bc_button_t button;
 
@@ -22,10 +19,6 @@ bc_tmp112_t tmp112;
 // Accelerometer instance
 bc_lis2dh12_t lis2dh12;
 bc_lis2dh12_result_g_t result;
-
-
-// Dice instance
-bc_dice_t dice;
 
 // Counters for button events
 uint16_t button_click_count = 0;
@@ -44,28 +37,12 @@ void button_event_handler(bc_button_t *self, bc_button_event_t event, void *even
 {
     if (event == BC_BUTTON_EVENT_CLICK)
     {
-        // Pulse LED for 100 milliseconds
-        bc_led_pulse(&led, 100);
-
-        // Increment press count
-        button_click_count++;
-
-        bc_log_info("APP: Publish button press count = %u", button_click_count);
-
         bc_radio_pub_acceleration(&(result.x_axis), &(result.y_axis), &(result.z_axis));
     }
     else if (event == BC_BUTTON_EVENT_HOLD)
     {
-        // Pulse LED for 250 milliseconds
-        bc_led_pulse(&led, 250);
-
-        // Increment hold count
-        button_hold_count++;
-
-        bc_log_info("APP: Publish button hold count = %u", button_hold_count);
-
         // Publish message on radio
-        bc_radio_pub_event_count(BC_RADIO_PUB_EVENT_HOLD_BUTTON, &button_hold_count);
+        bc_radio_pub_acceleration_hold(&(result.x_axis), &(result.y_axis), &(result.z_axis));
 
         // Set button hold event flag
         button_hold_event = true;
@@ -126,6 +103,18 @@ void lis2dh12_event_handler(bc_lis2dh12_t *self, bc_lis2dh12_event_t event, void
     }
 }
 
+bool bc_radio_pub_acceleration_hold(float *x_axis, float *y_axis, float *z_axis)
+{
+    char stringBuffer[25];
+    int pointer;
+
+    pointer = snprintf(stringBuffer, sizeof(stringBuffer), "[%.2f,", *x_axis);
+    pointer += snprintf(stringBuffer + pointer, sizeof(stringBuffer), "%.2f,", *y_axis);
+    snprintf(stringBuffer + pointer, sizeof(stringBuffer), "%.2f]", *z_axis);
+
+    return bc_radio_pub_string("accelerometer/-/acceleration_hold", stringBuffer);
+}
+
 // This function is run as task and exits service mode
 void exit_service_mode_task(void *param)
 {
@@ -145,10 +134,6 @@ void application_init(void)
     bc_log_init(BC_LOG_LEVEL_INFO, BC_LOG_TIMESTAMP_ABS);
     bc_log_info("APP: Reset");
 
-    // Initialize LED
-    bc_led_init(&led, BC_GPIO_LED, false, false);
-    bc_led_set_mode(&led, BC_LED_MODE_OFF);
-
     // Initialize button
     bc_button_init(&button, BC_GPIO_BUTTON, BC_GPIO_PULL_DOWN, false);
     bc_button_set_event_handler(&button, button_event_handler, NULL);
@@ -160,20 +145,15 @@ void application_init(void)
 
     // Initialize accelerometer
     bc_lis2dh12_init(&lis2dh12, BC_I2C_I2C0, 0x19);
+    bc_lis2dh12_set_resolution(&lis2dh12, BC_LIS2DH12_RESOLUTION_8BIT);
     bc_lis2dh12_set_event_handler(&lis2dh12, lis2dh12_event_handler, NULL);
     bc_lis2dh12_set_update_interval(&lis2dh12, ACCELEROMETER_UPDATE_SERVICE_INTERVAL);
-
-    // Initialize dice
-    bc_dice_init(&dice, BC_DICE_FACE_UNKNOWN);
 
     // Initialize radio
     bc_radio_init(BC_RADIO_MODE_NODE_SLEEPING);
 
     // Send radio pairing request
-    bc_radio_pairing_request("push-button", VERSION);
+    bc_radio_pairing_request("radio-presenter", VERSION);
 
     bc_scheduler_register(exit_service_mode_task, NULL, SERVICE_MODE_INTERVAL);
-
-    // Pulse LED
-    bc_led_pulse(&led, 2000);
 }
