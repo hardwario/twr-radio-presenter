@@ -3,34 +3,15 @@
 // Service mode interval defines how much time
 #define SERVICE_MODE_INTERVAL (15 * 60 * 1000)
 #define BATTERY_UPDATE_INTERVAL (60 * 60 * 1000)
-#define TEMPERATURE_PUB_INTERVAL (15 * 60 * 1000)
-#define TEMPERATURE_PUB_DIFFERENCE 0.2f
-#define TEMPERATURE_UPDATE_SERVICE_INTERVAL (1 * 1000)
-#define TEMPERATURE_UPDATE_NORMAL_INTERVAL (10 * 1000)
 #define ACCELEROMETER_UPDATE_SERVICE_INTERVAL (1 * 1000)
 #define ACCELEROMETER_UPDATE_NORMAL_INTERVAL (10 * 1000)
 
 // Button instance
 bc_button_t button;
 
-// Thermometer instance
-bc_tmp112_t tmp112;
-
 // Accelerometer instance
 bc_lis2dh12_t lis2dh12;
 bc_lis2dh12_result_g_t result;
-
-// Counters for button events
-uint16_t button_click_count = 0;
-uint16_t button_hold_count = 0;
-
-// Time of button has press
-bc_tick_t tick_start_button_press;
-// Flag for button hold event
-bool button_hold_event;
-
-// Time of next temperature report
-bc_tick_t tick_temperature_report = 0;
 
 // This function dispatches button events
 void button_event_handler(bc_button_t *self, bc_button_event_t event, void *event_param)
@@ -44,24 +25,6 @@ void button_event_handler(bc_button_t *self, bc_button_event_t event, void *even
         // Publish message on radio
         bc_radio_pub_acceleration_hold(&(result.x_axis), &(result.y_axis), &(result.z_axis));
 
-        // Set button hold event flag
-        button_hold_event = true;
-    }
-    else if (event == BC_BUTTON_EVENT_PRESS)
-    {
-        // Reset button hold event flag
-        button_hold_event = false;
-
-        tick_start_button_press = bc_tick_get();
-    }
-    else if (event == BC_BUTTON_EVENT_RELEASE)
-    {
-        if (button_hold_event)
-        {
-            int hold_duration = bc_tick_get() - tick_start_button_press;
-
-            bc_radio_pub_value_int(BC_RADIO_PUB_VALUE_HOLD_DURATION_BUTTON, &hold_duration);
-        }
     }
 }
 
@@ -118,8 +81,6 @@ bool bc_radio_pub_acceleration_hold(float *x_axis, float *y_axis, float *z_axis)
 // This function is run as task and exits service mode
 void exit_service_mode_task(void *param)
 {
-    // Set thermometer update interval to normal
-    bc_tmp112_set_update_interval(&tmp112, TEMPERATURE_UPDATE_NORMAL_INTERVAL);
 
     // Set accelerometer update interval to normal
     bc_lis2dh12_set_update_interval(&lis2dh12, ACCELEROMETER_UPDATE_NORMAL_INTERVAL);
@@ -136,6 +97,7 @@ void application_init(void)
 
     // Initialize button
     bc_button_init(&button, BC_GPIO_BUTTON, BC_GPIO_PULL_DOWN, false);
+    bc_button_set_hold_time(&button, 500);
     bc_button_set_event_handler(&button, button_event_handler, NULL);
 
     // Initialize battery

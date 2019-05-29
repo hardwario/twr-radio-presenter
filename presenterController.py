@@ -5,47 +5,80 @@ broker="127.0.0.1"
 keyboard = Controller()
 #define callback
 def on_message(client, userdata, message):
+<<<<<<< HEAD
+    message = str(message.payload.decode("utf-8"))
+=======
     time.sleep(1)
-    if(str(message.payload.decode("utf-8")) == "next"):
+    message = str(message.payload.decode("utf-8")
+>>>>>>> f8828b7b69d790ef7e7e063a4ea472a8e246342e
+    if(message == "next"):
         print("next slide")
         keyboard.press(Key.right)
         keyboard.release(Key.right)
-    elif(str(message.payload.decode("utf-8")) == "prev"):
+<<<<<<< HEAD
+        
+=======
+>>>>>>> f8828b7b69d790ef7e7e063a4ea472a8e246342e
+    elif(message == "prev"):
         print("prev slide")
         keyboard.press(Key.left)
         keyboard.release(Key.left)
-    elif(str(message.payload.decode("utf-8")) == "start"):
+<<<<<<< HEAD
+        
+=======
+>>>>>>> f8828b7b69d790ef7e7e063a4ea472a8e246342e
+    elif(message == "start"):
         print("start presentation")
         keyboard.press(Key.f5)
         keyboard.release(Key.f5)
-    elif(str(message.payload.decode("utf-8")) == "tab"):
+<<<<<<< HEAD
+        
+=======
+>>>>>>> f8828b7b69d790ef7e7e063a4ea472a8e246342e
+    elif(message == "tab"):
         print("tab button")
         keyboard.press(Key.alt)
         keyboard.press(Key.tab)
         keyboard.release(Key.tab)
-    elif(str(message.payload.decode("utf-8")) == "enter"):
+<<<<<<< HEAD
+        
+=======
+>>>>>>> f8828b7b69d790ef7e7e063a4ea472a8e246342e
+    elif(message == "enter"):
         print("enter button")
         keyboard.release(Key.alt)
         keyboard.press(Key.enter)
         keyboard.release(Key.enter)
-    elif(str(message.payload.decode("utf-8")) == "esc"):
+<<<<<<< HEAD
+        
+=======
+>>>>>>> f8828b7b69d790ef7e7e063a4ea472a8e246342e
+    elif(message == "esc"):
         print("esc button")
         keyboard.release(Key.alt)
         keyboard.press(Key.esc)
         keyboard.release(Key.esc)
-    elif(str(message.payload.decode("utf-8")) == "end"):
+<<<<<<< HEAD
+        
+=======
+>>>>>>> f8828b7b69d790ef7e7e063a4ea472a8e246342e
+    elif(message == "end"):
         print("end button")
         keyboard.press(Key.alt)
         keyboard.press(Key.f4)
         keyboard.release(Key.f4)
         keyboard.release(Key.alt)
-    elif(str(message.payload.decode("utf-8")) == "space"):
+<<<<<<< HEAD
+        
+=======
+>>>>>>> f8828b7b69d790ef7e7e063a4ea472a8e246342e
+    elif(message == "space"):
         print("space button")
         keyboard.release(Key.alt)
         keyboard.press(Key.space)
         keyboard.release(Key.space)
         
-client= paho.Client("client-001")
+client= paho.Client("presenter-1")
 client.on_message=on_message
 
 print("connecting to broker ",broker)
@@ -55,5 +88,8 @@ client.loop_start() #start loop to process received messages
 print("subscribing ")
 client.subscribe("presenter/action")#subscribe
 while 1:
+<<<<<<< HEAD
+    time.sleep(0.2)
+=======
     time.sleep(1)
-
+>>>>>>> f8828b7b69d790ef7e7e063a4ea472a8e246342e
