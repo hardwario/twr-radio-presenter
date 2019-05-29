@@ -1,6 +1,8 @@
 import time
 import paho.mqtt.client as paho
 from pynput.keyboard import Key, Controller
+#Here goes IP address of your mqtt broker
+#If you are running it on this computer leave it as is
 broker="127.0.0.1"
 keyboard = Controller()
 #define callback
@@ -51,6 +53,18 @@ def on_message(client, userdata, message):
         keyboard.release(Key.alt)
         keyboard.press(Key.space)
         keyboard.release(Key.space)
+        
+    elif(message == "tabNext"):
+        print("next tab button")
+        keyboard.press(Key.tab)
+        keyboard.release(Key.tab)
+
+    elif(message == "tabPrev"):
+        print("prev tab button")
+        keyboard.press(Key.shift)
+        keyboard.press(Key.tab)
+        keyboard.release(Key.tab)
+        keyboard.release(Key.shift)
         
 client= paho.Client("presenter-1")
 client.on_message=on_message

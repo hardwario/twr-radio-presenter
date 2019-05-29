@@ -3,8 +3,7 @@
 // Service mode interval defines how much time
 #define SERVICE_MODE_INTERVAL (15 * 60 * 1000)
 #define BATTERY_UPDATE_INTERVAL (60 * 60 * 1000)
-#define ACCELEROMETER_UPDATE_SERVICE_INTERVAL (1 * 1000)
-#define ACCELEROMETER_UPDATE_NORMAL_INTERVAL (10 * 1000)
+#define ACCELEROMETER_UPDATE_NORMAL_INTERVAL (200)
 
 // Button instance
 bc_button_t button;
@@ -16,6 +15,10 @@ bc_lis2dh12_result_g_t result;
 // This function dispatches button events
 void button_event_handler(bc_button_t *self, bc_button_event_t event, void *event_param)
 {
+    if (bc_lis2dh12_get_result_g(&lis2dh12, &result))
+    {
+        bc_log_info("APP: Acceleration = [%.2f,%.2f,%.2f]", result.x_axis, result.y_axis, result.z_axis);
+    }
     if (event == BC_BUTTON_EVENT_CLICK)
     {
         bc_radio_pub_acceleration(&(result.x_axis), &(result.y_axis), &(result.z_axis));
@@ -24,7 +27,6 @@ void button_event_handler(bc_button_t *self, bc_button_event_t event, void *even
     {
         // Publish message on radio
         bc_radio_pub_acceleration_hold(&(result.x_axis), &(result.y_axis), &(result.z_axis));
-
     }
 }
 
@@ -51,7 +53,7 @@ void battery_event_handler(bc_module_battery_event_t event, void *event_param)
 void lis2dh12_event_handler(bc_lis2dh12_t *self, bc_lis2dh12_event_t event, void *event_param)
 {
     // Update event?
-    if (event == BC_LIS2DH12_EVENT_UPDATE)
+    /*if (event == BC_LIS2DH12_EVENT_UPDATE)
     {
         // Successfully read accelerometer vectors?
         if (bc_lis2dh12_get_result_g(self, &result))
@@ -63,7 +65,7 @@ void lis2dh12_event_handler(bc_lis2dh12_t *self, bc_lis2dh12_event_t event, void
     else if (event == BC_LIS2DH12_EVENT_ERROR)
     {
         bc_log_error("APP: Accelerometer error");
-    }
+    }*/
 }
 
 bool bc_radio_pub_acceleration_hold(float *x_axis, float *y_axis, float *z_axis)
@@ -76,17 +78,6 @@ bool bc_radio_pub_acceleration_hold(float *x_axis, float *y_axis, float *z_axis)
     snprintf(stringBuffer + pointer, sizeof(stringBuffer), "%.2f]", *z_axis);
 
     return bc_radio_pub_string("accelerometer/-/acceleration_hold", stringBuffer);
-}
-
-// This function is run as task and exits service mode
-void exit_service_mode_task(void *param)
-{
-
-    // Set accelerometer update interval to normal
-    bc_lis2dh12_set_update_interval(&lis2dh12, ACCELEROMETER_UPDATE_NORMAL_INTERVAL);
-
-    // Unregister current task (it has only one-shot purpose)
-    bc_scheduler_unregister(bc_scheduler_get_current_task_id());
 }
 
 void application_init(void)
@@ -109,13 +100,11 @@ void application_init(void)
     bc_lis2dh12_init(&lis2dh12, BC_I2C_I2C0, 0x19);
     bc_lis2dh12_set_resolution(&lis2dh12, BC_LIS2DH12_RESOLUTION_8BIT);
     bc_lis2dh12_set_event_handler(&lis2dh12, lis2dh12_event_handler, NULL);
-    bc_lis2dh12_set_update_interval(&lis2dh12, ACCELEROMETER_UPDATE_SERVICE_INTERVAL);
+    bc_lis2dh12_set_update_interval(&lis2dh12, ACCELEROMETER_UPDATE_NORMAL_INTERVAL);
 
     // Initialize radio
     bc_radio_init(BC_RADIO_MODE_NODE_SLEEPING);
 
     // Send radio pairing request
     bc_radio_pairing_request("radio-presenter", VERSION);
-
-    bc_scheduler_register(exit_service_mode_task, NULL, SERVICE_MODE_INTERVAL);
 }
