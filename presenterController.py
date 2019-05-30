@@ -28,16 +28,15 @@ def on_message(client, userdata, message):
         keyboard.press(Key.alt)
         keyboard.press(Key.tab)
         keyboard.release(Key.tab)
+        keyboard.release(Key.alt)
         
     elif(message == "enter"):
         print("enter button")
-        keyboard.release(Key.alt)
         keyboard.press(Key.enter)
         keyboard.release(Key.enter)
         
     elif(message == "esc"):
         print("esc button")
-        keyboard.release(Key.alt)
         keyboard.press(Key.esc)
         keyboard.release(Key.esc)
         
@@ -50,7 +49,6 @@ def on_message(client, userdata, message):
         
     elif(message == "space"):
         print("space button")
-        keyboard.release(Key.alt)
         keyboard.press(Key.space)
         keyboard.release(Key.space)
         

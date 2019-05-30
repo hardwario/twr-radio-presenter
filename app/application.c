@@ -15,10 +15,6 @@ bc_lis2dh12_result_g_t result;
 // This function dispatches button events
 void button_event_handler(bc_button_t *self, bc_button_event_t event, void *event_param)
 {
-    if (bc_lis2dh12_get_result_g(&lis2dh12, &result))
-    {
-        bc_log_info("APP: Acceleration = [%.2f,%.2f,%.2f]", result.x_axis, result.y_axis, result.z_axis);
-    }
     if (event == BC_BUTTON_EVENT_CLICK)
     {
         bc_radio_pub_acceleration(&(result.x_axis), &(result.y_axis), &(result.z_axis));
@@ -53,7 +49,7 @@ void battery_event_handler(bc_module_battery_event_t event, void *event_param)
 void lis2dh12_event_handler(bc_lis2dh12_t *self, bc_lis2dh12_event_t event, void *event_param)
 {
     // Update event?
-    /*if (event == BC_LIS2DH12_EVENT_UPDATE)
+    if (event == BC_LIS2DH12_EVENT_UPDATE)
     {
         // Successfully read accelerometer vectors?
         if (bc_lis2dh12_get_result_g(self, &result))
@@ -61,11 +57,6 @@ void lis2dh12_event_handler(bc_lis2dh12_t *self, bc_lis2dh12_event_t event, void
             bc_log_info("APP: Acceleration = [%.2f,%.2f,%.2f]", result.x_axis, result.y_axis, result.z_axis);
         }
     }
-    // Error event?
-    else if (event == BC_LIS2DH12_EVENT_ERROR)
-    {
-        bc_log_error("APP: Accelerometer error");
-    }*/
 }
 
 bool bc_radio_pub_acceleration_hold(float *x_axis, float *y_axis, float *z_axis)
@@ -73,9 +64,7 @@ bool bc_radio_pub_acceleration_hold(float *x_axis, float *y_axis, float *z_axis)
     char stringBuffer[25];
     int pointer;
 
-    pointer = snprintf(stringBuffer, sizeof(stringBuffer), "[%.2f,", *x_axis);
-    pointer += snprintf(stringBuffer + pointer, sizeof(stringBuffer), "%.2f,", *y_axis);
-    snprintf(stringBuffer + pointer, sizeof(stringBuffer), "%.2f]", *z_axis);
+    pointer = snprintf(stringBuffer, sizeof(stringBuffer), "[%.1f,%.1f,%.1f]", *x_axis, *y_axis, *z_axis);
 
     return bc_radio_pub_string("accelerometer/-/acceleration_hold", stringBuffer);
 }
