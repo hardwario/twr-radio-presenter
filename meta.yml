@@ -2,7 +2,7 @@ article: https://www.hackster.io/jakub-smejkal/wireless-presenter-with-accelerom
 video: https://youtu.be/OCPPKXzCBg0
 images:
   - title:
-    url: https://github.com/hardwario/website/blob/master/static/kits-images/push-button/main.png
+    url: https://raw.githubusercontent.com/hardwario/website/master/static/kits-images/push-button/main.png
 assembly:
   - name: HARDWARIO Button Module
   - name: HARDWARIO Core Module
