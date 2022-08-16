@@ -62,9 +62,8 @@ void lis2dh12_event_handler(twr_lis2dh12_t *self, twr_lis2dh12_event_t event, vo
 bool twr_radio_pub_acceleration_hold(float *x_axis, float *y_axis, float *z_axis)
 {
     char stringBuffer[25];
-    int pointer;
 
-    pointer = snprintf(stringBuffer, sizeof(stringBuffer), "[%.1f,%.1f,%.1f]", *x_axis, *y_axis, *z_axis);
+    snprintf(stringBuffer, sizeof(stringBuffer), "[%.1f,%.1f,%.1f]", *x_axis, *y_axis, *z_axis);
 
     return twr_radio_pub_string("accelerometer/-/acceleration_hold", stringBuffer);
 }
